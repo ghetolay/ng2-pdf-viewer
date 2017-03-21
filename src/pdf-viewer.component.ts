@@ -116,7 +116,10 @@ export class PdfViewerComponent implements OnChanges {
     if (this.src) {
       PDFJS.getDocument(this.src).then(pdf => {
         this._pdf = pdf;
-        this.afterLoadComplete.emit(pdf);
+
+        if (this.afterLoadComplete && typeof this.afterLoadComplete === 'function') {
+          this.afterLoadComplete(pdf);
+        }
 
         this.update();
       });
@@ -153,7 +156,10 @@ export class PdfViewerComponent implements OnChanges {
 
   private buildSVG(viewport, textContent) {
     const SVG_NS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(SVG_NS, 'svg:svg');
+    const svg = <SVGSVGElement>document.createElementNS(SVG_NS, 'svg:svg');
+
+    svg.style.position = "absolute";
+    svg.style.left = "0";
 
     svg.setAttribute('width', viewport.width + 'px');
     svg.setAttribute('height', viewport.height + 'px');
@@ -188,10 +194,6 @@ export class PdfViewerComponent implements OnChanges {
       let index = this._showAll ? page.pageIndex : 0;
       let canvas = container.querySelectorAll('canvas')[index];
       canvas.parentNode.insertBefore(this.buildSVG(viewport, textContent), canvas);
-      canvas.style.position = 'absolute';
-      canvas.style.top = '0';
-      canvas.style.left = '0';
-      canvas.style.zIndex = '-1';
     });
   }
 
